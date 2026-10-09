@@ -1,0 +1,26 @@
+{
+  "specVersion": 1,
+  "hashes": [
+    { "input": "", "seed": 0, "hash": "00000000" },
+    { "input": "", "seed": 1, "hash": "514e28b7" },
+    { "input": "", "seed": 4294967295, "hash": "81f16f39" },
+    { "input": "a", "seed": 2538058380, "hash": "7fa09ea6" },
+    { "input": "aa", "seed": 2538058380, "hash": "5d211726" },
+    { "input": "aaa", "seed": 2538058380, "hash": "283e0130" },
+    { "input": "aaaa", "seed": 2538058380, "hash": "5a97808a" },
+    { "input": "abc", "seed": 0, "hash": "b3dd93fa" },
+    { "input": "abc", "seed": 2538058380, "hash": "c84a62dd" },
+    { "input": "test", "seed": 0, "hash": "ba6bd213" },
+    { "input": "Hello, world!", "seed": 0, "hash": "c0363e43" },
+    { "input": "Hello, world!", "seed": 2538058380, "hash": "24884cba" },
+    { "input": "The quick brown fox jumps over the lazy dog", "seed": 0, "hash": "2e4ff723" },
+    { "input": "The quick brown fox jumps over the lazy dog", "seed": 2538058380, "hash": "2fa826cd" }
+  ],
+  "buckets": [
+    { "input": "", "hash": "00000000", "bucket": 0 },
+    { "input": "test", "hash": "ba6bd213", "bucket": 28307 },
+    { "input": "Hello, world!", "hash": "c0363e43", "bucket": 80355 },
+    { "input": "abc", "hash": "b3dd93fa", "bucket": 43002 },
+    { "input": "The quick brown fox jumps over the lazy dog", "hash": "2e4ff723", "bucket": 92547 }
+  ]
+}

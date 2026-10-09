@@ -1,0 +1,17 @@
+{
+  "name": "sticky-rollout-evaluator",
+  "version": "1.0.0",
+  "description": "A TypeScript feature flag evaluator with sticky MurmurHash3 percentage rollouts and shared conformance vectors",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0"
+  }
+}

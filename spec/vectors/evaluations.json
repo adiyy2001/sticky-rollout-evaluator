@@ -1,0 +1,121 @@
+{
+  "specVersion": 1,
+  "flags": {
+    "checkout": {
+      "key": "checkout",
+      "enabled": true,
+      "killSwitch": false,
+      "salt": "9f2c41",
+      "variants": [{ "key": "on", "value": true }, { "key": "off", "value": false }],
+      "offVariant": "off",
+      "rules": [
+        { "id": "staff", "conditions": [{ "attribute": "team", "operator": "equals", "values": ["staff"] }], "serve": { "variant": "on" } },
+        {
+          "id": "paying-adults",
+          "conditions": [
+            { "attribute": "plan", "operator": "in", "values": ["pro", "team"] },
+            { "attribute": "age", "operator": "gte", "values": [18] }
+          ],
+          "serve": { "rollout": [{ "variant": "on", "weight": 100000 }, { "variant": "off", "weight": 0 }] }
+        }
+      ],
+      "fallthrough": { "rollout": [{ "variant": "on", "weight": 0 }, { "variant": "off", "weight": 100000 }] }
+    },
+    "killed": {
+      "key": "killed",
+      "enabled": true,
+      "killSwitch": true,
+      "salt": "ab12",
+      "variants": [{ "key": "on", "value": true }, { "key": "off", "value": false }],
+      "offVariant": "off",
+      "rules": [{ "id": "everyone", "conditions": [], "serve": { "variant": "on" } }],
+      "fallthrough": { "variant": "on" }
+    },
+    "disabled": {
+      "key": "disabled",
+      "enabled": false,
+      "killSwitch": false,
+      "salt": "ab12",
+      "variants": [{ "key": "on", "value": true }, { "key": "off", "value": false }],
+      "offVariant": "off",
+      "rules": [{ "id": "everyone", "conditions": [], "serve": { "variant": "on" } }],
+      "fallthrough": { "variant": "on" }
+    },
+    "banner": {
+      "key": "banner",
+      "enabled": true,
+      "killSwitch": false,
+      "salt": "c0ffee",
+      "variants": [{ "key": "blue", "value": "#0000ff" }, { "key": "green", "value": "#00ff00" }, { "key": "red", "value": "#ff0000" }],
+      "offVariant": "blue",
+      "rules": [
+        { "id": "admins", "conditions": [{ "attribute": "roles", "operator": "in", "values": ["admin"] }], "serve": { "variant": "red" } },
+        {
+          "id": "beta-paths",
+          "conditions": [{ "attribute": "path", "operator": "startsWith", "values": ["/beta", "/preview"] }],
+          "serve": { "rollout": [{ "variant": "green", "weight": 0 }, { "variant": "red", "weight": 0 }, { "variant": "blue", "weight": 100000 }] }
+        }
+      ],
+      "fallthrough": { "rollout": [{ "variant": "green", "weight": 100000 }, { "variant": "red", "weight": 0 }, { "variant": "blue", "weight": 0 }] }
+    },
+    "negation": {
+      "key": "negation",
+      "enabled": true,
+      "killSwitch": false,
+      "salt": "1a2b3c",
+      "variants": [{ "key": "on", "value": true }, { "key": "off", "value": false }],
+      "offVariant": "off",
+      "rules": [{ "id": "outside-poland", "conditions": [{ "attribute": "country", "operator": "in", "values": ["PL"], "negate": true }], "serve": { "variant": "on" } }],
+      "fallthrough": { "variant": "off" }
+    },
+    "open": {
+      "key": "open",
+      "enabled": true,
+      "killSwitch": false,
+      "salt": "0f",
+      "variants": [{ "key": "on", "value": true }, { "key": "off", "value": false }],
+      "offVariant": "off",
+      "rules": [{ "id": "all", "conditions": [], "serve": { "variant": "on" } }],
+      "fallthrough": { "variant": "off" }
+    },
+    "tiers": {
+      "key": "tiers",
+      "enabled": true,
+      "killSwitch": false,
+      "salt": "77",
+      "variants": [{ "key": "on", "value": true }, { "key": "off", "value": false }],
+      "offVariant": "off",
+      "rules": [{ "id": "tier-five", "conditions": [{ "attribute": "tier", "operator": "equals", "values": [5] }], "serve": { "variant": "on" } }],
+      "fallthrough": { "variant": "off" }
+    }
+  },
+  "cases": [
+    { "name": "staff skips the rollout", "flag": "checkout", "context": { "key": "u1", "attributes": { "team": "staff" } }, "expected": { "variantKey": "on", "value": true, "reason": "RULE_MATCH", "ruleIndex": 0, "ruleId": "staff", "bucketed": false } },
+    { "name": "paying adult enters the full rollout", "flag": "checkout", "context": { "key": "u2", "attributes": { "plan": "pro", "age": 30 } }, "expected": { "variantKey": "on", "value": true, "reason": "RULE_MATCH", "ruleIndex": 1, "ruleId": "paying-adults", "bucketed": true } },
+    { "name": "age bound is inclusive", "flag": "checkout", "context": { "key": "u3", "attributes": { "plan": "team", "age": 18 } }, "expected": { "variantKey": "on", "value": true, "reason": "RULE_MATCH", "ruleIndex": 1, "ruleId": "paying-adults", "bucketed": true } },
+    { "name": "minor falls through", "flag": "checkout", "context": { "key": "u4", "attributes": { "plan": "pro", "age": 17 } }, "expected": { "variantKey": "off", "value": false, "reason": "FALLTHROUGH", "ruleIndex": null, "ruleId": null, "bucketed": true } },
+    { "name": "missing age falls through", "flag": "checkout", "context": { "key": "u5", "attributes": { "plan": "pro" } }, "expected": { "variantKey": "off", "value": false, "reason": "FALLTHROUGH", "ruleIndex": null, "ruleId": null, "bucketed": true } },
+    { "name": "age given as text is not a number", "flag": "checkout", "context": { "key": "u6", "attributes": { "plan": "pro", "age": "30" } }, "expected": { "variantKey": "off", "value": false, "reason": "FALLTHROUGH", "ruleIndex": null, "ruleId": null, "bucketed": true } },
+    { "name": "list attribute matches on any element", "flag": "checkout", "context": { "key": "u7", "attributes": { "plan": ["free", "team"], "age": 25 } }, "expected": { "variantKey": "on", "value": true, "reason": "RULE_MATCH", "ruleIndex": 1, "ruleId": "paying-adults", "bucketed": true } },
+    { "name": "unlisted plan falls through", "flag": "checkout", "context": { "key": "u8", "attributes": { "plan": "enterprise", "age": 40 } }, "expected": { "variantKey": "off", "value": false, "reason": "FALLTHROUGH", "ruleIndex": null, "ruleId": null, "bucketed": true } },
+    { "name": "empty context key is allowed", "flag": "checkout", "context": { "key": "", "attributes": { "plan": "pro", "age": 40 } }, "expected": { "variantKey": "on", "value": true, "reason": "RULE_MATCH", "ruleIndex": 1, "ruleId": "paying-adults", "bucketed": true } },
+    { "name": "context without attributes falls through", "flag": "checkout", "context": { "key": "u9" }, "expected": { "variantKey": "off", "value": false, "reason": "FALLTHROUGH", "ruleIndex": null, "ruleId": null, "bucketed": true } },
+    { "name": "first matching rule wins", "flag": "checkout", "context": { "key": "u10", "attributes": { "team": "staff", "plan": "pro", "age": 30 } }, "expected": { "variantKey": "on", "value": true, "reason": "RULE_MATCH", "ruleIndex": 0, "ruleId": "staff", "bucketed": false } },
+    { "name": "kill switch beats matching rules", "flag": "killed", "context": { "key": "u11" }, "expected": { "variantKey": "off", "value": false, "reason": "KILL_SWITCH", "ruleIndex": null, "ruleId": null, "bucketed": false } },
+    { "name": "disabled flag serves the off variant", "flag": "disabled", "context": { "key": "u12" }, "expected": { "variantKey": "off", "value": false, "reason": "OFF", "ruleIndex": null, "ruleId": null, "bucketed": false } },
+    { "name": "admin role in a list", "flag": "banner", "context": { "key": "u13", "attributes": { "roles": ["dev", "admin"] } }, "expected": { "variantKey": "red", "value": "#ff0000", "reason": "RULE_MATCH", "ruleIndex": 0, "ruleId": "admins", "bucketed": false } },
+    { "name": "beta path serves blue through a rollout with zero weights", "flag": "banner", "context": { "key": "u14", "attributes": { "path": "/beta/settings" } }, "expected": { "variantKey": "blue", "value": "#0000ff", "reason": "RULE_MATCH", "ruleIndex": 1, "ruleId": "beta-paths", "bucketed": true } },
+    { "name": "second prefix of startsWith", "flag": "banner", "context": { "key": "u15", "attributes": { "path": "/preview", "roles": ["dev"] } }, "expected": { "variantKey": "blue", "value": "#0000ff", "reason": "RULE_MATCH", "ruleIndex": 1, "ruleId": "beta-paths", "bucketed": true } },
+    { "name": "other path falls through to green", "flag": "banner", "context": { "key": "u16", "attributes": { "path": "/home" } }, "expected": { "variantKey": "green", "value": "#00ff00", "reason": "FALLTHROUGH", "ruleIndex": null, "ruleId": null, "bucketed": true } },
+    { "name": "startsWith is case sensitive", "flag": "banner", "context": { "key": "u17", "attributes": { "path": "/Beta" } }, "expected": { "variantKey": "green", "value": "#00ff00", "reason": "FALLTHROUGH", "ruleIndex": null, "ruleId": null, "bucketed": true } },
+    { "name": "negation with a missing attribute does not match", "flag": "negation", "context": { "key": "u18", "attributes": {} }, "expected": { "variantKey": "off", "value": false, "reason": "FALLTHROUGH", "ruleIndex": null, "ruleId": null, "bucketed": false } },
+    { "name": "negation matches another country", "flag": "negation", "context": { "key": "u19", "attributes": { "country": "DE" } }, "expected": { "variantKey": "on", "value": true, "reason": "RULE_MATCH", "ruleIndex": 0, "ruleId": "outside-poland", "bucketed": false } },
+    { "name": "negation excludes the listed country", "flag": "negation", "context": { "key": "u20", "attributes": { "country": "PL" } }, "expected": { "variantKey": "off", "value": false, "reason": "FALLTHROUGH", "ruleIndex": null, "ruleId": null, "bucketed": false } },
+    { "name": "negation matches a present value of another type", "flag": "negation", "context": { "key": "u21", "attributes": { "country": 5 } }, "expected": { "variantKey": "on", "value": true, "reason": "RULE_MATCH", "ruleIndex": 0, "ruleId": "outside-poland", "bucketed": false } },
+    { "name": "negation with a list holding the listed country", "flag": "negation", "context": { "key": "u22", "attributes": { "country": ["PL", "DE"] } }, "expected": { "variantKey": "off", "value": false, "reason": "FALLTHROUGH", "ruleIndex": null, "ruleId": null, "bucketed": false } },
+    { "name": "rule without conditions matches everyone", "flag": "open", "context": { "key": "u23" }, "expected": { "variantKey": "on", "value": true, "reason": "RULE_MATCH", "ruleIndex": 0, "ruleId": "all", "bucketed": false } },
+    { "name": "number equals number", "flag": "tiers", "context": { "key": "u24", "attributes": { "tier": 5 } }, "expected": { "variantKey": "on", "value": true, "reason": "RULE_MATCH", "ruleIndex": 0, "ruleId": "tier-five", "bucketed": false } },
+    { "name": "text never equals a number", "flag": "tiers", "context": { "key": "u25", "attributes": { "tier": "5" } }, "expected": { "variantKey": "off", "value": false, "reason": "FALLTHROUGH", "ruleIndex": null, "ruleId": null, "bucketed": false } },
+    { "name": "number list holding the value", "flag": "tiers", "context": { "key": "u26", "attributes": { "tier": [1, 5] } }, "expected": { "variantKey": "on", "value": true, "reason": "RULE_MATCH", "ruleIndex": 0, "ruleId": "tier-five", "bucketed": false } }
+  ]
+}
