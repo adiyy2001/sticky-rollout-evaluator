@@ -1,6 +1,6 @@
 # sticky-rollout-evaluator
 
-A TypeScript feature flag evaluator whose percentage rollouts use MurmurHash3, so a user always lands in the same bucket and any runtime that follows the same rules gets the same answer.
+A TypeScript feature flag evaluator whose percentage rollouts use MurmurHash3, so a given user always falls into the same bucket and any runtime using the same rules will return the same result.
 
 ## Requirements
 
